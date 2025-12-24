@@ -1,4 +1,4 @@
-name: CI for Mac Storage Manager Tap
+name: CI for Unix Storage Manager CLI Tap
 
 on:
   push:
@@ -14,43 +14,51 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
+
       - name: Update Homebrew
         run: |
           brew update || true
           brew doctor || true
+
       - name: Build and install formula from source
         run: |
-          brew install --build-from-source narekmosisian/mac-storage-manager/mac-storage-manager
+          brew install --build-from-source unix-storage-manager-cli
+
       - name: Run tests
         run: |
-          brew test narekmosisian/mac-storage-manager/mac-storage-manager
-          brew audit --strict narekmosisian/mac-storage-manager/mac-storage-manager
+          brew test unix-storage-manager-cli
+          brew audit --strict unix-storage-manager-cli
 
   linux:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
+
       - name: Install Homebrew on Linux
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> "$HOME/.profile"
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
       - name: Install zsh
         run: |
           sudo apt-get update
           sudo apt-get install -y zsh
+
       - name: Update Homebrew
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           brew update || true
           brew doctor || true
+
       - name: Build and install formula from source
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          brew install --build-from-source narekmosisian/mac-storage-manager/mac-storage-manager
+          brew install --build-from-source unix-storage-manager-cli
+
       - name: Run tests
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          brew test narekmosisian/mac-storage-manager/mac-storage-manager
-          brew audit --strict narekmosisian/mac-storage-manager/mac-storage-manager
+          brew test unix-storage-manager-cli
+          brew audit --strict unix-storage-manager-cli
