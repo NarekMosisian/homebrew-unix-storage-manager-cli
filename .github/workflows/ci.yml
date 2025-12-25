@@ -20,18 +20,20 @@ jobs:
           brew update || true
           brew doctor || true
 
-      - name: Tap this repository (local checkout)
+      - name: Tap this repository
         run: |
-          brew tap --force-auto-update narekmosisian/unix-storage-manager-cli "$GITHUB_WORKSPACE"
+          brew untap NarekMosisian/unix-storage-manager-cli 2>/dev/null || true
+          brew tap NarekMosisian/unix-storage-manager-cli
 
-      - name: Build and install formula from this tap
+      - name: Install formula from this tap
         run: |
-          brew install --build-from-source narekmosisian/unix-storage-manager-cli/unix-storage-manager-cli
+          brew uninstall unix-storage-manager-cli 2>/dev/null || true
+          brew install --build-from-source unix-storage-manager-cli
 
-      - name: Run tests
+      - name: Test & audit
         run: |
-          brew test narekmosisian/unix-storage-manager-cli/unix-storage-manager-cli
-          brew audit --strict narekmosisian/unix-storage-manager-cli/unix-storage-manager-cli
+          brew test unix-storage-manager-cli
+          brew audit --strict --formula unix-storage-manager-cli
 
   linux:
     runs-on: ubuntu-latest
@@ -42,30 +44,30 @@ jobs:
       - name: Install Homebrew on Linux
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> "$HOME/.profile"
-          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           echo "/home/linuxbrew/.linuxbrew/bin" >> "$GITHUB_PATH"
           echo "/home/linuxbrew/.linuxbrew/sbin" >> "$GITHUB_PATH"
-
-      - name: Install zsh
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y zsh
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
       - name: Update Homebrew
         run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           brew update || true
           brew doctor || true
 
-      - name: Tap this repository (local checkout)
+      - name: Tap this repository
         run: |
-          brew tap --force-auto-update narekmosisian/unix-storage-manager-cli "$GITHUB_WORKSPACE"
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          brew untap NarekMosisian/unix-storage-manager-cli 2>/dev/null || true
+          brew tap NarekMosisian/unix-storage-manager-cli
 
-      - name: Build and install formula from this tap
+      - name: Install formula from this tap
         run: |
-          brew install --build-from-source narekmosisian/unix-storage-manager-cli/unix-storage-manager-cli
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          brew uninstall unix-storage-manager-cli 2>/dev/null || true
+          brew install --build-from-source unix-storage-manager-cli
 
-      - name: Run tests
+      - name: Test & audit
         run: |
-          brew test narekmosisian/unix-storage-manager-cli/unix-storage-manager-cli
-          brew audit --strict narekmosisian/unix-storage-manager-cli/unix-storage-manager-cli
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          brew test unix-storage-manager-cli
+          brew audit --strict --formula unix-storage-manager-cli
