@@ -22,12 +22,12 @@ jobs:
 
       - name: Build and install formula from source
         run: |
-          brew install --build-from-source unix-storage-manager-cli
+          brew install --build-from-source ./Formula/unix-storage-manager-cli.rb
 
       - name: Run tests
         run: |
           brew test unix-storage-manager-cli
-          brew audit --strict unix-storage-manager-cli
+          brew audit --strict ./Formula/unix-storage-manager-cli.rb
 
   linux:
     runs-on: ubuntu-latest
@@ -55,10 +55,10 @@ jobs:
       - name: Build and install formula from source
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          brew install --build-from-source unix-storage-manager-cli
+          brew install --build-from-source ./Formula/unix-storage-manager-cli.rb
 
       - name: Run tests
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           brew test unix-storage-manager-cli
-          brew audit --strict unix-storage-manager-cli
+          brew audit --strict ./Formula/unix-storage-manager-cli.rb
