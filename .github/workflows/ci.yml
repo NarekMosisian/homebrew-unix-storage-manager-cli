@@ -8,6 +8,9 @@ on:
     branches:
       - main
 
+env:
+  HOMEBREW_NO_AUTO_UPDATE: "1"
+
 jobs:
   macos:
     runs-on: macos-latest
@@ -23,7 +26,7 @@ jobs:
       - name: Tap this repository as a Homebrew tap (local checkout)
         run: |
           TAP_NAME="${{ github.repository_owner }}/unix-storage-manager-cli"
-          brew tap "$TAP_NAME" "$GITHUB_WORKSPACE"
+          brew tap "$TAP_NAME" "$(pwd)"
 
       - name: Build and install formula from this tap
         run: |
@@ -58,7 +61,7 @@ jobs:
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           TAP_NAME="${{ github.repository_owner }}/unix-storage-manager-cli"
-          brew tap "$TAP_NAME" "$GITHUB_WORKSPACE"
+          brew tap "$TAP_NAME" "$(pwd)"
 
       - name: Build and install formula from this tap
         run: |

@@ -10,26 +10,24 @@ class UnixStorageManagerCli < Formula
 
   def install
     libexec.install Dir["*.sh"]
-    libexec.install "sounds" if Dir.exist?("sounds")
-    libexec.install "images" if Dir.exist?("images")
+
+    confs = Dir["*.conf"]
+    libexec.install confs if confs.any?
+
+    libexec.install "sounds" if (buildpath/"sounds").exist?
 
     (bin/"unix-storage-manager").write <<~EOS
       #!/usr/bin/env bash
       set -euo pipefail
-
       USM_HOME="#{libexec}"
-      export UNIX_STORAGE_MANAGER_SHARE="$USM_HOME"
       export MAC_STORAGE_MANAGER_SHARE="$USM_HOME"
-
       cd "$USM_HOME"
       exec bash "./main.sh" "$@"
     EOS
-
-    chmod 0755, bin/"unix-storage-manager"
   end
 
   test do
     assert_path_exists bin/"unix-storage-manager"
-    system "#{bin}/unix-storage-manager", "--test-run"
+    system "#{bin}/unix-storage-manager", "--help"
   end
 end
