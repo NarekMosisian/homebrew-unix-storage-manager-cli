@@ -10,15 +10,31 @@ class UnixStorageManagerCli < Formula
   depends_on "newt"
 
   def install
+    # Prevent runtime files from being written into the Cellar (read-only in CI and bad practice).
+    inreplace "config.sh" do |s|
+      s.sub!(
+        /^XDG_CACHE=.*\n/,
+        "\\0\n" \
+        "# App-specific directories (Homebrew patch)\n" \
+        "USM_APP_NAME=\"unix-storage-manager-cli\"\n" \
+        "XDG_STATE=\"${XDG_STATE_HOME:-$HOME/.local/state}\"\n" \
+        "USM_CONFIG_DIR=\"$XDG_CONFIG/$USM_APP_NAME\"\n" \
+        "USM_STATE_DIR=\"$XDG_STATE/$USM_APP_NAME\"\n" \
+        "mkdir -p \"$USM_CONFIG_DIR\" \"$USM_STATE_DIR\"\n"
+      )
+
+      s.gsub!(/^FIND_METHOD_FILE=.*$/, 'FIND_METHOD_FILE="$USM_CONFIG_DIR/find_method.conf"')
+      s.gsub!(/^LANG_CONF_FILE=.*$/, 'LANG_CONF_FILE="$USM_CONFIG_DIR/language.conf"')
+      s.gsub!(/^LOG_FILE=.*$/, 'LOG_FILE="$USM_STATE_DIR/unix_storage_manager.log"')
+    end
+
     libexec.install Dir["*.sh"]
 
     confs = Dir["*.conf"]
     libexec.install confs if confs.any?
 
-    libexec.install "sounds" if (buildpath/"sounds").directory?
-    libexec.install "images" if (buildpath/"images").directory?
-
-    bash = Formula["bash"].opt_bin/"bash"
+    libexec.install "sounds" if (buildpath/"sounds").exist?
+    libexec.install "images" if (buildpath/"images").exist?
 
     (bin/"unix-storage-manager").write <<~EOS
       #!/usr/bin/env bash
@@ -28,19 +44,13 @@ class UnixStorageManagerCli < Formula
       export MAC_STORAGE_MANAGER_SHARE="$USM_HOME"
 
       cd "$USM_HOME"
-      exec "#{bash}" "./main.sh" "$@"
+      exec "#{Formula["bash"].opt_bin}/bash" "./main.sh" "$@"
     EOS
-
-    (bin/"unix-storage-manager").chmod 0755
   end
 
   test do
     assert_path_exists bin/"unix-storage-manager"
-
-    output = `#{bin}/unix-storage-manager --help 2>&1`
-    status = $?.exitstatus
-
-    assert_includes [0, 1], status
-    assert_match(/unix-storage-manager|usage/i, output)
+    output = shell_output("#{bin}/unix-storage-manager --test-run")
+    assert_match(/Dummy\\.app|dummy\\.desktop/i, output)
   end
 end
