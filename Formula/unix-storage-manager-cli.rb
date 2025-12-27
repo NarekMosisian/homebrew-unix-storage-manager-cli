@@ -11,16 +11,16 @@ class UnixStorageManagerCli < Formula
   def install
     libexec.install Dir["*.sh"]
 
-    confs = Dir["*.conf"]
-    libexec.install confs if confs.any?
+    conf_files = Dir["*.conf"]
+    libexec.install conf_files unless conf_files.empty?
 
-    libexec.install "sounds" if (buildpath/"sounds").exist?
+    libexec.install "sounds" if Dir.exist?("sounds")
+    libexec.install "images" if Dir.exist?("images")
 
     (bin/"unix-storage-manager").write <<~EOS
       #!/usr/bin/env bash
       set -euo pipefail
       USM_HOME="#{libexec}"
-      export MAC_STORAGE_MANAGER_SHARE="$USM_HOME"
       cd "$USM_HOME"
       exec bash "./main.sh" "$@"
     EOS
@@ -28,6 +28,8 @@ class UnixStorageManagerCli < Formula
 
   test do
     assert_path_exists bin/"unix-storage-manager"
-    system "#{bin}/unix-storage-manager", "--help"
+
+    output = shell_output("#{bin}/unix-storage-manager --test-run")
+    assert_match(/Dummy\\.app|dummy\\.desktop/i, output)
   end
 end

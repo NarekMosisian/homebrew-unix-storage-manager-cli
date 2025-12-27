@@ -2,14 +2,9 @@ name: CI for Unix Storage Manager CLI Tap
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
-
-env:
-  HOMEBREW_NO_AUTO_UPDATE: "1"
+    branches: [main]
 
 jobs:
   macos:
@@ -25,19 +20,22 @@ jobs:
 
       - name: Tap this repository as a Homebrew tap (local checkout)
         run: |
-          TAP_NAME="${{ github.repository_owner }}/unix-storage-manager-cli"
-          brew tap "$TAP_NAME" "$(pwd)"
+          TAP_NAME="${GITHUB_REPOSITORY_OWNER}/unix-storage-manager-cli"
+          brew untap "$TAP_NAME" 2>/dev/null || true
+          brew tap "$TAP_NAME" "$GITHUB_WORKSPACE"
 
       - name: Build and install formula from this tap
         run: |
-          TAP_NAME="${{ github.repository_owner }}/unix-storage-manager-cli"
-          brew install --build-from-source "$TAP_NAME/unix-storage-manager-cli"
+          TAP_NAME="${GITHUB_REPOSITORY_OWNER}/unix-storage-manager-cli"
+          FORMULA="$TAP_NAME/unix-storage-manager-cli"
+          brew install --build-from-source "$FORMULA"
 
-      - name: Test & audit
+      - name: Test and audit
         run: |
-          TAP_NAME="${{ github.repository_owner }}/unix-storage-manager-cli"
-          brew test "$TAP_NAME/unix-storage-manager-cli"
-          brew audit --strict "$TAP_NAME/unix-storage-manager-cli"
+          TAP_NAME="${GITHUB_REPOSITORY_OWNER}/unix-storage-manager-cli"
+          FORMULA="$TAP_NAME/unix-storage-manager-cli"
+          brew test "$FORMULA"
+          brew audit --strict "$FORMULA"
 
   linux:
     runs-on: ubuntu-latest
@@ -45,33 +43,24 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Install Homebrew on Linux
+      - name: Install Homebrew (non-interactive)
+        env:
+          NONINTERACTIVE: "1"
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> "$HOME/.profile"
-          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
-      - name: Update Homebrew
+      - name: Build, test and audit
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
           brew update || true
           brew doctor || true
 
-      - name: Tap this repository as a Homebrew tap (local checkout)
-        run: |
-          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          TAP_NAME="${{ github.repository_owner }}/unix-storage-manager-cli"
-          brew tap "$TAP_NAME" "$(pwd)"
+          TAP_NAME="${GITHUB_REPOSITORY_OWNER}/unix-storage-manager-cli"
+          brew untap "$TAP_NAME" 2>/dev/null || true
+          brew tap "$TAP_NAME" "$GITHUB_WORKSPACE"
 
-      - name: Build and install formula from this tap
-        run: |
-          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          TAP_NAME="${{ github.repository_owner }}/unix-storage-manager-cli"
-          brew install --build-from-source "$TAP_NAME/unix-storage-manager-cli"
-
-      - name: Test & audit
-        run: |
-          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          TAP_NAME="${{ github.repository_owner }}/unix-storage-manager-cli"
-          brew test "$TAP_NAME/unix-storage-manager-cli"
-          brew audit --strict "$TAP_NAME/unix-storage-manager-cli"
+          FORMULA="$TAP_NAME/unix-storage-manager-cli"
+          brew install --build-from-source "$FORMULA"
+          brew test "$FORMULA"
+          brew audit --strict "$FORMULA"
