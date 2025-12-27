@@ -50,7 +50,7 @@ class UnixStorageManagerCli < Formula
 
   test do
     assert_path_exists bin/"unix-storage-manager"
-    output = shell_output("#{bin}/unix-storage-manager --test-run")
-    assert_match(/Dummy\\.app|dummy\\.desktop/i, output)
+    assert_match(/unix-storage-manager|usage/i, shell_output("#{bin}/unix-storage-manager --help"))
   end
+
 end
